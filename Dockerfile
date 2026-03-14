@@ -20,4 +20,12 @@ COPY --from=build /app/target/app.jar app.jar
 EXPOSE 8080
 
 # Shell form so $PORT is expanded at container startup
-CMD java -Dspring.profiles.active=prod -Dserver.port=${PORT:-8080} -jar app.jar
+CMD java \
+  -Xms64m \
+  -Xmx256m \
+  -XX:+UseContainerSupport \
+  -XX:MaxRAMPercentage=60.0 \
+  -XX:+UseG1GC \
+  -Dspring.profiles.active=prod \
+  -Dserver.port=${PORT:-8080} \
+  -jar app.jar
