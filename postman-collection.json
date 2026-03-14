@@ -1,0 +1,557 @@
+{
+  "info": {
+    "name": "Food Delivery API",
+    "description": "Complete Food Delivery REST API — Spring Boot\n\n## Quick Start\n1. Run the app: `mvn spring-boot:run`\n2. Login with any test account to get a token\n3. Set `{{token}}` variable from login response\n\n## Test Accounts\n- Admin: admin@fooddelivery.com / admin123\n- Customer: rahul@example.com / password123\n- Owner: owner@restaurant.com / owner123\n- Delivery: delivery@example.com / delivery123\n\n## Sample Coupons\n- WELCOME50 (50% off, max ₹200)\n- FLAT100 (₹100 off on orders ≥ ₹300)\n- FREEDEL (₹50 off delivery)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "food-delivery-api-v2"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "token",   "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" }
+  ],
+  "event": [{
+    "listen": "prerequest", "script": { "type": "text/javascript", "exec": [""] }
+  }],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/auth/signup",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"test1234\",\n  \"phone\": \"9888888888\",\n  \"role\": \"CUSTOMER\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Customer)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var res = pm.response.json();",
+            "if(res.data) {",
+            "  pm.collectionVariables.set('token', res.data.accessToken);",
+            "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+            "  console.log('Token saved');",
+            "}"
+          ], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"rahul@example.com\",\n  \"password\": \"password123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var res = pm.response.json();",
+            "if(res.data) {",
+            "  pm.collectionVariables.set('token', res.data.accessToken);",
+            "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+            "}"
+          ], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@fooddelivery.com\",\n  \"password\": \"admin123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Owner)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var res = pm.response.json();",
+            "if(res.data) { pm.collectionVariables.set('token', res.data.accessToken); }"
+          ], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"owner@restaurant.com\",\n  \"password\": \"owner123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Delivery Partner)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var res = pm.response.json();",
+            "if(res.data) { pm.collectionVariables.set('token', res.data.accessToken); }"
+          ], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"delivery@example.com\",\n  \"password\": \"delivery123\"\n}" }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var res = pm.response.json();",
+            "if(res.data) { pm.collectionVariables.set('token', res.data.accessToken); }"
+          ], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/auth/refresh",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/auth/logout",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/api/users/profile",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT", "url": "{{baseUrl}}/api/users/profile",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Rahul Kumar\",\n  \"phone\": \"9999999999\",\n  \"address\": \"45 Park Street, Bangalore\"\n}" }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/users/change-password",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpass456\"\n}" }
+          }
+        },
+        {
+          "name": "Get Saved Addresses",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/api/users/addresses",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Add Address",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/users/addresses",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"Home\",\n  \"fullAddress\": \"123 MG Road, Koramangala, Bangalore - 560034\",\n  \"city\": \"Bangalore\",\n  \"pincode\": \"560034\",\n  \"latitude\": 12.9716,\n  \"longitude\": 77.5946,\n  \"defaultAddress\": true\n}" }
+          }
+        },
+        {
+          "name": "Set Default Address",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/api/users/addresses/1/default",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Delete Address",
+          "request": {
+            "method": "DELETE", "url": "{{baseUrl}}/api/users/addresses/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🍽️ Restaurants",
+      "item": [
+        {
+          "name": "Get All Restaurants",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/restaurants?page=0&size=10&sortBy=rating", "host": ["{{baseUrl}}"], "path": ["api","restaurants"], "query": [{"key":"page","value":"0"},{"key":"size","value":"10"},{"key":"sortBy","value":"rating"}] } }
+        },
+        {
+          "name": "Search Restaurants",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/restaurants/search?query=biryani", "host": ["{{baseUrl}}"], "path": ["api","restaurants","search"], "query": [{"key":"query","value":"biryani"}] } }
+        },
+        {
+          "name": "Search by City",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/restaurants/search?city=Bangalore", "host": ["{{baseUrl}}"], "path": ["api","restaurants","search"], "query": [{"key":"city","value":"Bangalore"}] } }
+        },
+        {
+          "name": "Get Restaurant by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/restaurants/1" }
+        },
+        {
+          "name": "Get Restaurant Menu",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/restaurants/1/menu" }
+        },
+        {
+          "name": "Search Menu Items",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/restaurants/1/menu?query=chicken", "host": ["{{baseUrl}}"], "path": ["api","restaurants","1","menu"], "query": [{"key":"query","value":"chicken"}] } }
+        },
+        {
+          "name": "Create Restaurant (Owner)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/restaurants/manage",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"The Biryani House\",\n  \"description\": \"Best biryani in town\",\n  \"address\": \"123 Main Street, Koramangala\",\n  \"city\": \"Bangalore\",\n  \"cuisine\": \"Indian\",\n  \"deliveryTime\": 40,\n  \"deliveryFee\": 30.0,\n  \"minOrder\": 150.0,\n  \"openingTime\": \"10:00:00\",\n  \"closingTime\": \"23:00:00\"\n}" }
+          }
+        },
+        {
+          "name": "Update Restaurant (Owner)",
+          "request": {
+            "method": "PUT", "url": "{{baseUrl}}/api/restaurants/manage/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"deliveryFee\": 25.0,\n  \"deliveryTime\": 30\n}" }
+          }
+        },
+        {
+          "name": "Add Menu Item (Owner)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/restaurants/manage/1/menu",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Chicken Biryani\",\n  \"description\": \"Aromatic basmati rice with tender chicken\",\n  \"price\": 280.0,\n  \"category\": \"Main Course\",\n  \"veg\": false,\n  \"available\": true\n}" }
+          }
+        },
+        {
+          "name": "Update Menu Item (Owner)",
+          "request": {
+            "method": "PUT", "url": "{{baseUrl}}/api/restaurants/manage/1/menu/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 300.0,\n  \"available\": true\n}" }
+          }
+        },
+        {
+          "name": "Delete Menu Item (Owner)",
+          "request": {
+            "method": "DELETE", "url": "{{baseUrl}}/api/restaurants/manage/1/menu/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛒 Cart",
+      "item": [
+        {
+          "name": "View Cart",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/api/cart",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/cart/items",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"menuItemId\": 1,\n  \"quantity\": 2,\n  \"customization\": \"Extra gravy\"\n}" }
+          }
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "request": {
+            "method": "PATCH", "url": { "raw": "{{baseUrl}}/api/cart/items/1?quantity=3", "host": ["{{baseUrl}}"], "path": ["api","cart","items","1"], "query": [{"key":"quantity","value":"3"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Remove Cart Item (quantity=0)",
+          "request": {
+            "method": "PATCH", "url": { "raw": "{{baseUrl}}/api/cart/items/1?quantity=0", "host": ["{{baseUrl}}"], "path": ["api","cart","items","1"], "query": [{"key":"quantity","value":"0"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE", "url": "{{baseUrl}}/api/cart",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Orders",
+      "item": [
+        {
+          "name": "Place Order (with coupon)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/orders",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"restaurantId\": 1,\n  \"deliveryAddress\": \"12 MG Road, Koramangala, Bangalore\",\n  \"paymentMethod\": \"CARD\",\n  \"specialInstructions\": \"Extra spicy\",\n  \"couponCode\": \"WELCOME50\",\n  \"items\": [\n    { \"menuItemId\": 1, \"quantity\": 1 },\n    { \"menuItemId\": 4, \"quantity\": 2 }\n  ]\n}" }
+          }
+        },
+        {
+          "name": "Place Order (COD, no coupon)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/orders",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"restaurantId\": 2,\n  \"deliveryAddress\": \"45 Brigade Road, Bangalore\",\n  \"paymentMethod\": \"COD\",\n  \"items\": [\n    { \"menuItemId\": 5, \"quantity\": 1, \"customization\": \"Extra cheese\" }\n  ]\n}" }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/api/orders/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "My Order History",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/api/orders/my-orders?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api","orders","my-orders"], "query": [{"key":"page","value":"0"},{"key":"size","value":"10"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Reorder (repeat past order)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/orders/1/reorder",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/orders/1/cancel",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Update Order Status (Owner)",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/api/orders/1/status",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CONFIRMED\"\n}" }
+          }
+        },
+        {
+          "name": "Get Restaurant Orders (Owner)",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/api/orders/restaurant/1?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api","orders","restaurant","1"], "query": [{"key":"page","value":"0"},{"key":"size","value":"10"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Payments",
+      "item": [
+        {
+          "name": "Initiate Razorpay Payment",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/payments/razorpay/initiate/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Verify Razorpay Payment",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/payments/razorpay/verify",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"orderId\": 1,\n  \"razorpayPaymentId\": \"pay_test_123\",\n  \"razorpayOrderId\": \"order_test_123\",\n  \"razorpaySignature\": \"sig_test_123\"\n}" }
+          }
+        },
+        {
+          "name": "Pay with COD",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/payments/cod/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Initiate Stripe Payment",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/payments/stripe/initiate/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏷️ Coupons",
+      "item": [
+        {
+          "name": "List All Coupons (Public)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/coupons" }
+        },
+        {
+          "name": "Validate Coupon WELCOME50",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/coupons/validate",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"WELCOME50\",\n  \"orderAmount\": 350.0\n}" }
+          }
+        },
+        {
+          "name": "Validate Coupon FLAT100",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/coupons/validate",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"FLAT100\",\n  \"orderAmount\": 500.0\n}" }
+          }
+        },
+        {
+          "name": "Create Coupon (Admin only)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/coupons/admin",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"SAVE20\",\n  \"description\": \"20% off any order\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 20.0,\n  \"minOrderAmount\": 150.0,\n  \"maxDiscountAmount\": 100.0,\n  \"usageLimit\": 200,\n  \"expiryDate\": \"2026-12-31\"\n}" }
+          }
+        },
+        {
+          "name": "Deactivate Coupon (Admin only)",
+          "request": {
+            "method": "DELETE", "url": "{{baseUrl}}/api/coupons/admin/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Favourites",
+      "item": [
+        {
+          "name": "Get My Favourites",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/api/favourites",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Add to Favourites",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/favourites/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Check if Favourite",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/api/favourites/1/check",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Remove from Favourites",
+          "request": {
+            "method": "DELETE", "url": "{{baseUrl}}/api/favourites/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "⭐ Reviews",
+      "item": [
+        {
+          "name": "Add Review",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/reviews",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"restaurantId\": 1,\n  \"rating\": 5,\n  \"comment\": \"Amazing food and fast delivery!\"\n}" }
+          }
+        },
+        {
+          "name": "Get Reviews for Restaurant",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/reviews/restaurant/1" }
+        },
+        {
+          "name": "Delete My Review",
+          "request": {
+            "method": "DELETE", "url": "{{baseUrl}}/api/reviews/1",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚴 Delivery Partner",
+      "item": [
+        {
+          "name": "Get Available Orders",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/api/delivery/available-orders?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api","delivery","available-orders"], "query": [{"key":"page","value":"0"},{"key":"size","value":"10"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Get My Deliveries",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/api/delivery/my-deliveries?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api","delivery","my-deliveries"], "query": [{"key":"page","value":"0"},{"key":"size","value":"10"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Accept Delivery",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/api/delivery/orders/1/accept",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Update Delivery Status → Out for Delivery",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/api/delivery/orders/1/status",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"OUT_FOR_DELIVERY\"\n}" }
+          }
+        },
+        {
+          "name": "Mark as Delivered",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/api/delivery/orders/1/status",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"DELIVERED\"\n}" }
+          }
+        },
+        {
+          "name": "Update Live Location",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/api/delivery/orders/1/location",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"latitude\": 12.9716,\n  \"longitude\": 77.5946\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛠️ Admin",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/api/admin/dashboard",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/api/admin/users?page=0&size=20", "host": ["{{baseUrl}}"], "path": ["api","admin","users"], "query": [{"key":"page","value":"0"},{"key":"size","value":"20"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "List All Restaurants",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/api/admin/restaurants?page=0&size=20", "host": ["{{baseUrl}}"], "path": ["api","admin","restaurants"], "query": [{"key":"page","value":"0"},{"key":"size","value":"20"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "List All Orders",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/api/admin/orders?page=0&size=20", "host": ["{{baseUrl}}"], "path": ["api","admin","orders"], "query": [{"key":"page","value":"0"},{"key":"size","value":"20"}] },
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        },
+        {
+          "name": "Toggle User Active Status",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/api/admin/users/2/toggle-active",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}]
+          }
+        }
+      ]
+    }
+  ]
+}
